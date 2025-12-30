@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "pricer"
+version = "0.1.0"
+description = ""
+authors = ["ngmysamuel <e0148675@u.nus.edu>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+alpaca-py = "^0.43.2"
+pandas = "^2.3.3"
+streamlit = "^1.52.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
