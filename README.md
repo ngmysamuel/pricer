@@ -1,18 +1,26 @@
 # pricer
 
+## How to run
+
+### Cloud
+Visit https://pricer-py.streamlit.app/
+
+### Local
 ```
+git clone https://github.com/ngmysamuel/pricer.git
+cd pricer
 poetry install
+poetry run streamlit run src\pricer\streamlit_app.py
+```
+
+```
 poetry run python -m pricer.data.data
 poetry run python -m pricer.model.black_scholes_model
 ```
 
-```
-poetry run streamlit run src\pricer\streamlit_app.py
-```
-
 ## Others
 
-#### Notes
+### Notes
 Black-scholes can be used to either find the fair value of an option (assuming a uniform volatility surface) or the volatility implied by its current market price. This application calculates the implied volatility given the current market price of the option and plots a 3D surface against the option's strike price and days to expiry.
 
 To shift black-scholes so that the volatility becomes the subject, the first order derivative of it is required.Good news, the first order derivative is the same for both PUT and CALLs. The formula is as such:
@@ -31,7 +39,7 @@ We start off with a guess as to where the volatility is that resulted in the cur
 
 However, if the option has too small a vega or is near expiration, Newton - Raphson would not work. The fall back will use the bisection approach to solve for a root. Taking two maximum and minimum volatility guesses, we keep shifting solving for the option price using a midpoint sigma till we get a match with the current market value of the option. 
 
-#### Implementaion Details
+### Implementaion Details
 - Filtering of data - happens in 2 places, the model and the data
     - data - filters based on the data that is available
       - close price is not None
@@ -50,11 +58,11 @@ However, if the option has too small a vega or is near expiration, Newton - Raph
       - any volatility more than 5 is removed
         - affects the overall scaling of the surface graph
 
-#### To Do
+### To Do
 - to use Let's Be Rational paper to calculate BS (https://vollib.org/)
 - use Brent's Method (brentq) rather than just bisection
 
-#### Resources
+### Resources
 - https://theaiquant.medium.com/mastering-the-black-scholes-model-with-python-a-comprehensive-guide-to-option-pricing-11af712697b7
 - http://www.appliedbusinesseconomics.com/files/gvsnr02.pdf
 - https://brilliant.org/wiki/newton-raphson-method/
