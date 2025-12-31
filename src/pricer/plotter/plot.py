@@ -1,54 +1,51 @@
+# --- plot.py ---
 import numpy as np
-import scipy.interpolate as interpolate
-import seaborn as sns
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+from scipy.interpolate import griddata
 
 def create_volatility_surface(calls_data):
-    surface = (
-        calls_data[["days_to_expiry", "strike_price", "calculated_iv"]]
-        .pivot_table(
-            values="calculated_iv", index="strike_price", columns="days_to_expiry"
-        )
-        .dropna()
-    )
+    # 1. Extract scattered data points directly
+    # We do NOT use pivot_table here to avoid dropping sparse data
+    x = calls_data["days_to_expiry"]
+    y = calls_data["strike_price"]
+    z = calls_data["calculated_iv"]
 
-    # Prepare interpolation data
-    x = surface.columns.values
-    y = surface.index.values
-    X, Y = np.meshgrid(x, y)
-    Z = surface.values
+    # 2. Define a regular grid to interpolate onto
+    # Adjust '100' to change resolution (higher = smoother but slower)
+    xi = np.linspace(x.min(), x.max(), 50)
+    yi = np.linspace(y.min(), y.max(), 50)
+    X, Y = np.meshgrid(xi, yi)
 
-    # Create interpolation points
-    x_new = np.linspace(x.min(), x.max(), 100)
-    y_new = np.linspace(y.min(), y.max(), 100)
-    X_new, Y_new = np.meshgrid(x_new, y_new)
+    # 3. Interpolate the scattered data onto the grid
+    # 'cubic' looks smoother, 'linear' is more robust to outliers
+    Z = griddata((x, y), z, (X, Y), method='cubic')
 
-    # Perform interpolation
-    spline = interpolate.SmoothBivariateSpline(
-        X.flatten(), Y.flatten(), Z.flatten(), s=0.1
-    )
-    Z_smooth = spline(x_new, y_new)
-
-    return X_new, Y_new, Z_smooth
-
+    return X, Y, Z
 
 def plot_volatility_surface(X, Y, Z):
-    plt.style.use("default")
-    sns.set_style("whitegrid", {"axes.grid": False})
+    # Create interactive 3D plot with Plotly
+    fig = go.Figure(data=[go.Surface(
+        x=X, 
+        y=Y, 
+        z=Z,
+        colorscale='Viridis',
+        colorbar_title='Implied Volatility'
+    )])
 
-    fig = plt.figure(figsize=(12, 8))
-    ax = fig.add_subplot(111, projection="3d")
-
-    ax.plot_surface(
-        X, Y, Z, cmap="viridis", alpha=0.9, linewidth=0, antialiased=True
+    fig.update_layout(
+        title='Implied Volatility Surface',
+        scene=dict(
+            xaxis_title='Days to Expiration',
+            yaxis_title='Strike Price',
+            zaxis_title='Implied Volatility',
+            xaxis=dict(backgroundcolor="rgb(230, 230,230)"),
+            yaxis=dict(backgroundcolor="rgb(230, 230,230)"),
+            zaxis=dict(backgroundcolor="rgb(230, 230,230)")
+        ),
+        autosize=False,
+        width=800,
+        height=800,
+        margin=dict(l=65, r=50, b=65, t=90)
     )
 
-    ax.set_xlabel("Days to Expiration")
-    ax.set_ylabel("Strike Price")
-    ax.set_zlabel("Implied Volatility")
-    ax.set_title("AAPL Volatility Surface")
-    ax.view_init(elev=20, azim=45)
-
-    plt.tight_layout()
-    # plt.show()
-    return plt
+    return fig

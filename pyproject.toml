@@ -10,7 +10,7 @@ packages = [{include = "pricer", from = "src"}]
 python = "^3.12"
 alpaca-py = "^0.43.2"
 pandas = "^2.3.3"
-streamlit = "^1.52.2"
+streamlit = {extras = ["charts"], version = "^1.52.2"}
 seaborn = "^0.13.2"
 matplotlib = "^3.10.8"
 scipy = "^1.16.3"
