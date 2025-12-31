@@ -40,7 +40,7 @@ class Data:
             "APCA-API-SECRET-KEY": self.secret_key
         }
         params = {
-            "symbols": underlying_symbols,
+            "symbols": ",".join(underlying_symbols),
             "types": ["cash_dividend"],
             "start": (datetime.now() - timedelta(days=365)).date(),
             "limit": 1000
@@ -48,7 +48,8 @@ class Data:
         next_page = True
         while next_page:
             corp_act_resp = requests.get(corp_act_url, headers=headers, params=params).json()
-            for cash_dividend in corp_act_resp["corporate_actions"]["cash_dividends"]:
+            print(corp_act_resp)
+            for cash_dividend in corp_act_resp["corporate_actions"].get("cash_dividends", []):
                 self.dividend_yield_dict[cash_dividend["symbol"]] += cash_dividend["rate"]
             if corp_act_resp["next_page_token"]:
                 params["page_token"] = corp_act_resp["next_page_token"]
@@ -146,11 +147,9 @@ class Data:
             traceback.print_exc()
             return np.nan
 
-if __name__ == "__main__":
-    d = Data()
-    # d.get_active_contracts_csv(["AAPL"])
-    d.get_underlying_details(["AAPL"])
-    # d.contracts_dict["AAPL"] = d.clean_up_df(d.contracts_dict["AAPL"])
-    # d.contracts_dict["AAPL"].to_csv("output.csv")
-    print(d.asset_price_dict)
-    print(d.dividend_yield_dict)
+
+# d = Data()
+# d.get_active_contracts_csv(["AAPL"])
+# d.get_underlying_details(["TSLA"])
+# d.contracts_dict["AAPL"] = d.clean_up_df(d.contracts_dict["AAPL"])
+# d.contracts_dict["AAPL"].to_csv("output.csv")
