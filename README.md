@@ -25,15 +25,15 @@ Black-scholes can be used to either find the fair value of an option (assuming a
 
 To shift black-scholes so that the volatility becomes the subject, the first order derivative of it is required.Good news, the first order derivative is the same for both PUT and CALLs. The formula is as such:
 
-$$\sigma =\frac{V(\sigma )-V(\^{\sigma })+V^{\prime }(\^{\sigma })\^{\sigma }}{V^{\prime }(\^{\sigma })}$$
+$$\sigma =\frac{V(\sigma )-V(\hat{\sigma })+V^{\prime }(\^{\sigma })\hat{\sigma }}{V^{\prime }(\hat{\sigma })}$$
 
 where:
 
-$\^{\sigma }$ is the volatility guess
+$\hat{\sigma }$ is the volatility guess
 
 $V^{\prime}$ is the first order derivative of black-scholes
 
-$V^{\prime }(\^{\sigma })$ thus means the first order derivative of black-scholes using the volatility guess
+$V^{\prime }(\hat{\sigma })$ thus means the first order derivative of black-scholes using the volatility guess
 
 We start off with a guess as to where the volatility is that resulted in the current market price. Using the formula above, we can get a sigma value. Using Newton - Raphson, we can solve for the implied volatility. This is done by comparing the resulting sigma and the initial sigma guess. If they do not align, we repeat using the resulting sigma value as the guess value now. 
 
