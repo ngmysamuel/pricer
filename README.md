@@ -25,7 +25,7 @@ Black-scholes can be used to either find the fair value of an option (assuming a
 
 To shift black-scholes so that the volatility becomes the subject, the first order derivative of it is required.Good news, the first order derivative is the same for both PUT and CALLs. The formula is as such:
 
-$$\sigma =\frac{V(\sigma )-V(\hat{\sigma })+V^{\prime }(\^{\sigma })\hat{\sigma }}{V^{\prime }(\hat{\sigma })}$$
+$$\sigma =\frac{V(\sigma )-V(\hat{\sigma })+V^{\prime }(\hat{\sigma })\hat{\sigma }}{V^{\prime }(\hat{\sigma })}$$
 
 where:
 
