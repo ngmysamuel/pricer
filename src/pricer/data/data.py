@@ -18,6 +18,7 @@ from pricer.model.contract_model import ContractModel
 # https://github.com/alpacahq/alpaca-py/blob/master/examples/options/README.md
 # https://alpaca.markets/sdks/python/api_reference/trading/requests.html#getoptioncontractsrequest
 # https://alpaca.markets/sdks/python/api_reference/trading/models.html#optioncontract
+# https://docs.alpaca.markets/reference/corporateactions-1
 
 class Data:
     def __init__(self):
