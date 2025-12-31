@@ -34,7 +34,7 @@ from alpaca.trading.enums import (
     ContractType
 )
 from alpaca.common.exceptions import APIError
-from model.contract_model import ContractModel
+from pricer.model.contract_model import ContractModel
 import numpy as np
 import yfinance as yf
 from model.black_scholes_model import BlackScholesModel
@@ -67,7 +67,7 @@ class Data:
                 "underlying_symbols": underlying_symbols,
                 "status": AssetStatus.ACTIVE,
                 "expiration_date": None,     
-                "expiration_date_gte": "2025-12-30", 
+                "expiration_date_gte": "2025-12-31", 
                 "expiration_date_lte": None, 
                 "root_symbol": None,         
                 "type": ContractType.CALL,   
@@ -107,12 +107,13 @@ class Data:
         df["sigma"] = df["close_price"].pct_change().std() * np.sqrt(self.TRADING_DAYS_IN_YEAR)
         df["period_year"] = df["days_to_expiry"] / self.DAYS_IN_YEAR
         df["calculated_iv"] = df.apply(lambda row: self._calculate_iv(row), axis=1)
-        df = df.dropna(subset=["calculated_iv"])
+        # df = df.dropna(subset=["calculated_iv"])
 
         return df
 
-    def _calculate_iv(self, row, sigma: float, risk_free_rate: float = 0.035):
+    def _calculate_iv(self, row, risk_free_rate: float = 0.035):
         try:
+            print(row["period_year"])
             asset_price = self.asset_price_dict[row["underlying_symbol"]]
             dividend_yield = self.dividend_yield_dict[row["underlying_symbol"]]
             black_scholes_model = BlackScholesModel(
@@ -122,9 +123,14 @@ class Data:
                 K=row["strike"],
                 t=row["period_year"],
                 r=risk_free_rate,
-                sigma=sigma
+                sigma=row["sigma"]
             )
             return black_scholes_model.implied_volatility()
         except:
             print(f"Error calculating IV for {row['strike_price']}")
             return np.nan
+
+if __name__ == "__main__":
+    d = Data()
+    d.get_active_contracts_csv()
+    d.clean_up_df()
