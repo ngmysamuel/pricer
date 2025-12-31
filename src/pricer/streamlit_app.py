@@ -11,7 +11,7 @@ data = Data()
 
 @st.cache_data
 def get_data(underlying_symbols: list[str], limit: int = 1000):
-    data.contracts_dict = {}
+    data.contracts_dict = {} # reset the dictionary
     data.get_underlying_details(underlying_symbols)
     data.get_active_options_api(underlying_symbols, limit)
     return data.contracts_dict
