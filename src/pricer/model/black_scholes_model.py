@@ -7,7 +7,6 @@ class BlackScholesModel:
     Validated with https://www.quantpie.co.uk/oup/oup_bsm_price_greeks.php
     """
     def __init__(self, S, d, opt_px, K, T, r, sigma = None):
-        print(S, d, opt_px, K, T, r, sigma)
         self.S = S                     # Underlying asset price
         self.d = d                     # Underlying asset dividend yield
         self.option_price  = opt_px    # price of the option
@@ -47,7 +46,7 @@ class BlackScholesModel:
         while to_continue:
             implied_sigma = (self.option_price - self.call_option_price(sigma_guess) + (self.call_option_price_derivative(sigma_guess) * sigma_guess)) / self.call_option_price_derivative(sigma_guess)
             to_continue = abs(sigma_guess-implied_sigma) > 1E-3
-            print(sigma_guess, " ", implied_sigma)
+            # print(sigma_guess, " ", implied_sigma)
             sigma_guess = implied_sigma
         return sigma_guess
 

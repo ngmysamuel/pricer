@@ -209,3 +209,5 @@ __marimo__/
 # CSV
 *.csv
 *.csv#
+
+.vscode

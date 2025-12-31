@@ -4,6 +4,7 @@ version = "0.1.0"
 description = ""
 authors = ["ngmysamuel <e0148675@u.nus.edu>"]
 readme = "README.md"
+packages = [{include = "pricer", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.12"

@@ -46,7 +46,7 @@ def plot_volatility_surface(X, Y, Z):
     ax.set_xlabel("Days to Expiration")
     ax.set_ylabel("Strike Price")
     ax.set_zlabel("Implied Volatility")
-    ax.set_title("SPY Volatility Surface")
+    ax.set_title("AAPL Volatility Surface")
     ax.view_init(elev=20, azim=45)
 
     plt.tight_layout()

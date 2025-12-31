@@ -1,7 +1,9 @@
 # pricer
 
 ```
-poetry run python src/pricer/driver.py
+poetry install
+poetry run python -m pricer.data.data
+poetry run python pricer.model.black_scholes_model
 ```
 
 ```
