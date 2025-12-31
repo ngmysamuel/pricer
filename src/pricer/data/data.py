@@ -47,7 +47,7 @@ class Data:
                 "expiration_date_gte": "2025-12-31", 
                 "expiration_date_lte": None, 
                 "root_symbol": None,         
-                "type": ContractType.CALL,   
+                "type": None, #ContractType.CALL,   
                 "style": "american",         
                 "strike_price_gte": None,    
                 "strike_price_lte": None,    
@@ -56,29 +56,47 @@ class Data:
             }
             req = GetOptionContractsRequest(**args)
             res = self.trade_client.get_option_contracts(req)
-            ls = [a for a in res.option_contracts if int(a.size) == 100 and a.close_price is not None and a.open_interest is not None]
+            ls = [a for a in res.option_contracts if 
+                    int(a.size) == 100 
+                    and a.close_price is not None 
+                    and a.open_interest is not None
+                    and (
+                        (a.strike_price > self.asset_price_dict[ticker] and a.type == ContractType.CALL) # we only want OTM options
+                        or (a.strike_price < self.asset_price_dict[ticker] and a.type == ContractType.PUT)
+                        )
+                    and float(a.close_price) > 0.05 # filter out worthless options - assumption is that they are not realistic
+                ]
             all_contracts.extend(ls)
             while res.next_page_token:
                 args["page_token"] = res.next_page_token
                 req = GetOptionContractsRequest(**args)
                 res = self.trade_client.get_option_contracts(req)
-                ls = [a for a in res.option_contracts if int(a.size) == 100 and a.close_price is not None and a.open_interest is not None]
+                ls = [a for a in res.option_contracts if 
+                        int(a.size) == 100 
+                        and a.close_price is not None 
+                        and a.open_interest is not None
+                        and (
+                            (a.strike_price > self.asset_price_dict[ticker] and a.type == ContractType.CALL) # we only want OTM options
+                            or (a.strike_price < self.asset_price_dict[ticker] and a.type == ContractType.PUT)
+                        )
+                        and float(a.close_price) > 0.05 # filter out worthless options - assumption is that they are not realistic
+                    ]
                 all_contracts.extend(ls)
                 if len(all_contracts) > limit:
                     break
             
             df = pd.DataFrame([ContractModel.from_class(opt) for opt in all_contracts])
+            df = self.clean_up_df(df)
+            self.contracts_dict[ticker] = df
             df.to_csv(f"{ticker}_options.csv")
-            self.contracts_dict[ticker] = self.clean_up_df(df)
-        
 
     def get_active_contracts_csv(self, underlying_symbols: list[str]):
         for ticker in underlying_symbols:
             self.contracts_dict[ticker] = pd.read_csv(f"./{ticker}_options.csv")
 
     def clean_up_df(self, df: pd.DataFrame):
-        df["expiration_date"] = pd.to_datetime(df["expiration_date"])
-        df["days_to_expiry"] = (df["expiration_date"] - datetime.now()).dt.days
+        df["expiration_date"] = pd.to_datetime(df["expiration_date"]).dt.normalize()
+        df["days_to_expiry"] = (df["expiration_date"] - pd.Timestamp.now().normalize()).dt.days
         df["period_year"] = df["days_to_expiry"] / self.DAYS_IN_YEAR
         df["calculated_iv"] = df.apply(lambda row: self._calculate_iv(row), axis=1)
         df = df.dropna(subset=["calculated_iv"])
@@ -96,6 +114,7 @@ class Data:
                 K=row["strike_price"],
                 T=row["period_year"],
                 r=risk_free_rate,
+                typ=row["type"],
                 sigma=sigma_guess
             )
             return black_scholes_model.implied_volatility()
