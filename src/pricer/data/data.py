@@ -1,11 +1,13 @@
+import collections
 import os
 import traceback
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import numpy as np
 import pandas as pd
-import yfinance as yf
-
+import requests
+from alpaca.data.historical import StockHistoricalDataClient
+from alpaca.data.requests import StockLatestTradeRequest
 from alpaca.trading.client import TradingClient
 from alpaca.trading.enums import AssetStatus, ContractType
 from alpaca.trading.requests import GetOptionContractsRequest
@@ -22,18 +24,42 @@ class Data:
         self.api_key = os.environ.get('ALPACA_ID')
         self.secret_key = os.environ.get('ALPACA_KEY')
         self.trade_client = TradingClient(api_key=self.api_key, secret_key=self.secret_key, paper=True, url_override=None)
+        self.stock_client = StockHistoricalDataClient(self.api_key, self.secret_key)
 
         self.contracts_dict = {}
-        self.dividend_yield_dict = {}
+        self.dividend_yield_dict = collections.defaultdict(float)
         self.asset_price_dict = {}
         self.TRADING_DAYS_IN_YEAR = 252
         self.DAYS_IN_YEAR = 365
 
     def get_underlying_details(self, underlying_symbols: list[str]):
+        corp_act_url = "https://data.alpaca.markets/v1/corporate-actions"
+        headers = {
+            "accept": "application/json",
+            "APCA-API-KEY-ID": self.api_key,
+            "APCA-API-SECRET-KEY": self.secret_key
+        }
+        params = {
+            "symbols": underlying_symbols,
+            "types": ["cash_dividend"],
+            "start": (datetime.now() - timedelta(days=365)).date(),
+            "limit": 1000
+        }
+        next_page = True
+        while next_page:
+            corp_act_resp = requests.get(corp_act_url, headers=headers, params=params).json()
+            for cash_dividend in corp_act_resp["corporate_actions"]["cash_dividends"]:
+                self.dividend_yield_dict[cash_dividend["symbol"]] += cash_dividend["rate"]
+            if corp_act_resp["next_page_token"]:
+                params["page_token"] = corp_act_resp["next_page_token"]
+            else:
+                next_page = False
+        request_params = StockLatestTradeRequest(symbol_or_symbols=underlying_symbols)
+        latest_trades = self.stock_client.get_stock_latest_trade(request_params)
         for symbol in underlying_symbols:
-            ticker = yf.Ticker(symbol)
-            self.dividend_yield_dict[symbol] = ticker.info.get("dividendYield", 0) / 100
-            self.asset_price_dict[symbol] = ticker.info["previousClose"]
+            self.asset_price_dict[symbol] = latest_trades[symbol].price
+            self.dividend_yield_dict[symbol] = self.dividend_yield_dict[symbol] / self.asset_price_dict[symbol]
+
 
     def get_active_options_api(self, underlying_symbols: list[str], limit: int = 1000):
         for ticker in underlying_symbols:
@@ -122,7 +148,9 @@ class Data:
 
 if __name__ == "__main__":
     d = Data()
-    d.get_active_contracts_csv(["AAPL"])
+    # d.get_active_contracts_csv(["AAPL"])
     d.get_underlying_details(["AAPL"])
-    d.contracts_dict["AAPL"] = d.clean_up_df(d.contracts_dict["AAPL"])
-    d.contracts_dict["AAPL"].to_csv("output.csv")
+    # d.contracts_dict["AAPL"] = d.clean_up_df(d.contracts_dict["AAPL"])
+    # d.contracts_dict["AAPL"].to_csv("output.csv")
+    print(d.asset_price_dict)
+    print(d.dividend_yield_dict)
