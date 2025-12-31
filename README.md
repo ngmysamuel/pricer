@@ -10,7 +10,11 @@ poetry run python pricer.model.black_scholes_model
 poetry run streamlit run src\pricer\streamlit_app.py
 ```
 
-## Notes
+## Others
+
+#### Notes
+Black-scholes can be used to either find the fair value of an option (assuming a uniform volatility surface) or the volatility implied by its current market price. 
+
 #### To Do
 - to use Let's Be Rational paper to calculate BS (https://vollib.org/)
 

@@ -1,44 +1,18 @@
 import os
-import json
 import traceback
-from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
-from time import time
-import pandas as pd
-from alpaca.trading.client import TradingClient
-from alpaca.data.timeframe import TimeFrame, TimeFrameUnit
-from alpaca.data.historical.option import OptionHistoricalDataClient
-from alpaca.trading.stream import TradingStream
-from alpaca.data.live.option import OptionDataStream
-from alpaca.data.requests import (
-    OptionBarsRequest,
-    OptionTradesRequest,
-    OptionLatestQuoteRequest,
-    OptionLatestTradeRequest,
-    OptionSnapshotRequest,
-    OptionChainRequest    
-)
-from alpaca.trading.requests import (
-    GetOptionContractsRequest,
-    GetAssetsRequest,
-    MarketOrderRequest,
-    GetOrdersRequest,
-    ClosePositionRequest
-)
-from alpaca.trading.enums import (
-    AssetStatus,
-    ExerciseStyle,
-    OrderSide,
-    OrderType,
-    TimeInForce,
-    QueryOrderStatus,
-    ContractType
-)
-from alpaca.common.exceptions import APIError
-from pricer.model.contract_model import ContractModel
+from datetime import datetime
+
 import numpy as np
+import pandas as pd
 import yfinance as yf
+
+from alpaca.trading.client import TradingClient
+from alpaca.trading.enums import AssetStatus, ContractType
+from alpaca.trading.requests import GetOptionContractsRequest
+
 from pricer.model.black_scholes_model import BlackScholesModel
+from pricer.model.contract_model import ContractModel
+
 # https://github.com/alpacahq/alpaca-py/blob/master/examples/options/README.md
 # https://alpaca.markets/sdks/python/api_reference/trading/requests.html#getoptioncontractsrequest
 # https://alpaca.markets/sdks/python/api_reference/trading/models.html#optioncontract
@@ -88,9 +62,7 @@ class Data:
                 args["page_token"] = res.next_page_token
                 req = GetOptionContractsRequest(**args)
                 res = self.trade_client.get_option_contracts(req)
-                print(len(res.option_contracts))
                 ls = [a for a in res.option_contracts if int(a.size) == 100 and a.close_price is not None and a.open_interest is not None]
-                print(len(ls))
                 all_contracts.extend(ls)
                 if len(all_contracts) > limit:
                     break
@@ -115,7 +87,6 @@ class Data:
 
     def _calculate_iv(self, row, risk_free_rate: float = 0.035, sigma_guess: float = 0.1):
         try:
-            # print(row)
             asset_price = self.asset_price_dict[row["underlying_symbol"]]
             dividend_yield = self.dividend_yield_dict[row["underlying_symbol"]]
             black_scholes_model = BlackScholesModel(
@@ -127,14 +98,8 @@ class Data:
                 r=risk_free_rate,
                 sigma=sigma_guess
             )
-        except Exception as e:
-            print(1)
-            traceback.print_exc()
-            return np.nan
-        try:
             return black_scholes_model.implied_volatility()
-        except Exception as e:
-            print(2)
+        except:
             traceback.print_exc()
             return np.nan
 

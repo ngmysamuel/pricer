@@ -1,8 +1,8 @@
 # --- streamlit_app.py ---
 import streamlit as st
 from data.data import Data
-from plotter.plot import create_volatility_surface, plot_volatility_surface
-
+from plotter.plot import create_volatility_surface, plot_volatility_surface, find_vol_arbitrage
+import numpy as np
 # Initialize Data object
 data = Data()
 
@@ -24,13 +24,29 @@ for key, df in contracts_dict.items():
         st.write(df)
         continue
 
+    # 2. Interactive Threshold Slider
+    threshold = st.slider(
+        "Gradient Threshold (Sensitivity)", 
+        min_value=0.01, 
+        max_value=1.0, 
+        value=0.1, 
+        step=0.01,
+        help="Lower values detect smaller changes in volatility. Higher values only detect extreme jumps."
+    )
+
     try:
         # Create grid and plot
         x, y, z = create_volatility_surface(df)
-        fig = plot_volatility_surface(x, y, z)
+        
+        # Find Anomalies
+        anomaly_mask = find_vol_arbitrage(z, threshold=threshold)
+        num_anomalies = np.sum(anomaly_mask)
+        st.metric("Anomalies Detected", int(num_anomalies))
+
+        fig = plot_volatility_surface(x, y, z, anomaly_mask)
 
         # Render with Streamlit
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
         with st.expander("View Raw Data"):
             st.write(df[["expiration_date", "strike_price", "close_price", "calculated_iv"]])
