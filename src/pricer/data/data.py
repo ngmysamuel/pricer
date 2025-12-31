@@ -32,10 +32,8 @@ class Data:
     def get_underlying_details(self, underlying_symbols: list[str]):
         for symbol in underlying_symbols:
             ticker = yf.Ticker(symbol)
-            self.dividend_yield_dict[symbol] = ticker.info["dividendYield"] / 100
+            self.dividend_yield_dict[symbol] = ticker.info.get("dividendYield", 0) / 100
             self.asset_price_dict[symbol] = ticker.info["previousClose"]
-            print(self.dividend_yield_dict)
-            print(self.asset_price_dict)
 
     def get_active_options_api(self, underlying_symbols: list[str], limit: int = 1000):
         for ticker in underlying_symbols:
