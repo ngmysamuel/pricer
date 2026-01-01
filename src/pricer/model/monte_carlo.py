@@ -35,8 +35,8 @@ class MonteCarlo:
             payoffs.append(max(0, strike - average_price))
     average_payoff = np.mean(payoffs)
     discounted_price = average_payoff  * np.exp(-r * (path_length / 252))
-    return discounted_price, prices_archive
+    return discounted_price, np.array(prices_archive)
 
-m = MonteCarlo()
-px, _ = m.simple_random_walk(current_price=10,volatility=0.4,strike=10,typ="call",path_length=100)
-print(px)
+# m = MonteCarlo()
+# px, _ = m.simple_random_walk(current_price=10,volatility=0.4,strike=10,typ="call",path_length=100)
+# print(px)
