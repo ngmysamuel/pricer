@@ -66,7 +66,7 @@ class Data:
         for ticker in underlying_symbols:
             all_contracts = []
             args = {
-                "underlying_symbols": underlying_symbols,
+                "underlying_symbols": [ticker],
                 "status": AssetStatus.ACTIVE,
                 "expiration_date": None,     
                 "expiration_date_gte": "2025-12-31", 

@@ -1,0 +1,119 @@
+import streamlit as st
+import numpy as np
+import plotly.graph_objects as go
+from pricer.model.monte_carlo import MonteCarlo
+
+st.set_page_config(layout="wide", page_title="Asian Option Pricer", page_icon="🎲")
+st.title("Monte Carlo: Asian Option Pricer")
+
+# --- BRIDGE: Retrieve Shared Data ---
+available_data = st.session_state.get('page_2_data', {})
+
+# Create list for dropdown
+ticker_options = ["Manual Entry"] + list(available_data.keys())
+
+# --- Layout ---
+col_params, col_plot = st.columns([1, 3])
+
+with col_params:
+    st.subheader("Configuration")
+    
+    # 1. Ticker Selection
+    selected_ticker = st.selectbox(
+        "Select Underlying Asset", 
+        options=ticker_options,
+        help="Select a ticker analyzed in the Volatility Surface page, or use Manual Entry."
+    )
+
+    # 2. Determine Default Values based on selection
+    if selected_ticker != "Manual Entry":
+        data = available_data[selected_ticker]
+        default_price = float(data['price'])
+        # Ensure vol is valid
+        default_vol = float(data['vol']) if data['vol'] > 0 else 0.2
+        st.success(f"Loaded data for **{selected_ticker}**")
+    else:
+        default_price = 100.0
+        default_vol = 0.2
+
+    st.markdown("---")
+    
+    # 3. Input Fields (Pre-filled)
+    mc_price = st.number_input("Current Asset Price ($)", value=default_price, step=0.5)
+
+    mc_type = st.selectbox("Option Type", ["call", "put"])
+    
+    # Default strike to 5% OTM roughly
+    default_strike = round(mc_price * 1.05, 2) if mc_type == "call" else round(mc_price * 0.95, 2)
+    mc_strike = st.number_input("Strike Price ($)", value=default_strike, step=0.5, help="Defaulted to the 5% OTM")
+    
+    mc_vol = st.number_input("Volatility (σ)", value=default_vol, step=0.01, format="%.4f", help="Defaulted to median of IVs calculated in the previous page")
+    
+    mc_r = st.number_input("Risk Free Rate (r)", value=0.035, step=0.001, format="%.3f")
+    mc_days = st.number_input("Days to Expiration", value=30, step=1)
+    mc_iter = st.number_input("Iterations", value=1000, step=100, max_value=10000)
+    
+    st.markdown("---")
+    run_sim = st.button("Run Simulation", type="primary", use_container_width=True)
+
+with col_plot:
+    if run_sim:
+        with st.spinner(f"Simulating {mc_iter} paths for {selected_ticker}..."):
+            mc = MonteCarlo()
+            calc_price, paths = mc.simple_random_walk(
+                current_price=mc_price,
+                volatility=mc_vol,
+                strike=mc_strike,
+                typ=mc_type,
+                path_length=int(mc_days),
+                iterations=int(mc_iter),
+                r=mc_r
+            )
+
+        # --- Results ---
+        # Layout metrics
+        m1, m2, m3 = st.columns(3)
+        m1.metric(f"Fair Value ({mc_type.title()})", f"${calc_price:.4f}")
+        
+        final_prices = paths[:, -1]
+        itm_prob = np.mean(final_prices > mc_strike) if mc_type == "call" else np.mean(final_prices < mc_strike)
+        m2.metric("ITM Probability", f"{itm_prob:.1%}")
+        
+        avg_final = np.mean(final_prices)
+        m3.metric("Avg. Final Price", f"${avg_final:.2f}")
+
+        # --- Plotting ---
+        fig_mc = go.Figure()
+        days_axis = list(range(paths.shape[1]))
+
+        # Limit paths for performance
+        display_limit = 200
+        subset_paths = paths[:display_limit]
+        
+        for i in range(len(subset_paths)):
+            fig_mc.add_trace(go.Scatter(
+                x=days_axis, y=np.concatenate((np.array([mc_price]), subset_paths[i])),
+                mode='lines',
+                line=dict(width=1, color='rgba(0, 200, 255, 0.1)'),
+                showlegend=False, hoverinfo='skip'
+            ))
+
+        # Average Path
+        avg_path = np.mean(paths, axis=0)
+        fig_mc.add_trace(go.Scatter(
+            x=days_axis, y=avg_path,
+            mode='lines',
+            line=dict(width=3, color='#FF4B4B'),
+            name='Average Path'
+        ))
+        
+        # Strike Line
+        fig_mc.add_hline(y=mc_strike, line_dash="dash", line_color="orange", annotation_text="Strike")
+
+        fig_mc.update_layout(
+            title=f"Monte Carlo Simulation - {selected_ticker} - {mc_iter} Paths (showing 200)",
+            xaxis_title="Days", yaxis_title="Price",
+            template="plotly_dark", height=600
+        )
+        
+        st.plotly_chart(fig_mc, width='stretch')

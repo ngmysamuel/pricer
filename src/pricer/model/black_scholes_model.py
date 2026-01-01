@@ -21,7 +21,7 @@ class BlackScholesModel:
         self.SIGMA_LOWER_LIMIT = 0.001
         self.MAX_ITERATIONS = 250
         self.TIME_CAP = 7
-        self.MAX_VOL = 5
+        self.MAX_VOL = 3
 
     def d1(self, sigma: Optional[float] = None):
         if sigma is None:
