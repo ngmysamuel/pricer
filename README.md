@@ -16,6 +16,7 @@ poetry run streamlit run src\pricer\streamlit_app.py
 ```
 poetry run python -m pricer.data.data
 poetry run python -m pricer.model.black_scholes_model
+poetry run python -m pricer.model.monte_carlo
 ```
 
 ## Others
@@ -46,7 +47,7 @@ However, if the option has too small a vega or is near expiration, Newton - Raph
       - close price is more than 5 cents
         - we don't want worthless options. The assumption is that the option is worthless because it is not realistic which just adds noise
       - open interest is not None
-      - only OTM options 
+      - only OTM options - both PUTs and CALLs
     - model
       - moneyness - only keep options with stikes within 30% and 170% of the asset price. The others are too unrealistic
       - time to expiry - remove records which are expiring very soon. 
@@ -57,13 +58,21 @@ However, if the option has too small a vega or is near expiration, Newton - Raph
         - a person who buys the option and exercises it will get the stock $0.5 cheaper than buying on the open market
       - any volatility more than 5 is removed
         - affects the overall scaling of the surface graph
+- Timing issues
+    - black-scholes is calculated using the number of calendar days till expiry i.e. options expiring in hours (not days) will be 0/365
+    - we filter out options close to expiry so no issue with the above
+    - but if we do need to include, will need to use seconds instead
 
 ### To Do
 - to use Let's Be Rational paper to calculate BS (https://vollib.org/)
 - use Brent's Method (brentq) rather than just bisection
 
 ### Resources
+Black - Scholes
 - https://theaiquant.medium.com/mastering-the-black-scholes-model-with-python-a-comprehensive-guide-to-option-pricing-11af712697b7
 - http://www.appliedbusinesseconomics.com/files/gvsnr02.pdf
 - https://brilliant.org/wiki/newton-raphson-method/
 - https://brilliant.org/wiki/root-approximation-bisection/
+Monte - Carlo
+- https://www.investopedia.com/articles/07/montecarlo.asp (Euler-Maruyama Discretization)
+- https://quant.stackexchange.com/q/17032 (expected return is the risk free rate)

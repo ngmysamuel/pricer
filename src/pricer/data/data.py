@@ -49,7 +49,6 @@ class Data:
         next_page = True
         while next_page:
             corp_act_resp = requests.get(corp_act_url, headers=headers, params=params).json()
-            print(corp_act_resp)
             for cash_dividend in corp_act_resp["corporate_actions"].get("cash_dividends", []):
                 self.dividend_yield_dict[cash_dividend["symbol"]] += cash_dividend["rate"]
             if corp_act_resp["next_page_token"]:
