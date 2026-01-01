@@ -1,7 +1,12 @@
+import numpy as np
 import streamlit as st
 from data.data import Data
-from plotter.plot import create_volatility_surface, plot_volatility_surface, find_vol_arbitrage
-import numpy as np
+
+from pricer.plotter.plot_volatility_surface import (
+    create_volatility_surface,
+    find_vol_arbitrage,
+    plot_volatility_surface,
+)
 
 # Configure page
 st.set_page_config(layout="wide", page_title="Volatility Surface", page_icon="📈")

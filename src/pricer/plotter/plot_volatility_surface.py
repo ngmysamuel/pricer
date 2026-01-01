@@ -3,6 +3,7 @@ import numpy as np
 import plotly.graph_objects as go
 from scipy.interpolate import griddata
 
+
 def create_volatility_surface(calls_data):
     # 1. Extract scattered data points directly
     # not using pivot_table here to avoid dropping sparse data

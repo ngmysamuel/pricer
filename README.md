@@ -56,7 +56,7 @@ However, if the option has too small a vega or is near expiration, Newton - Raph
       - remove options which present a simple arbitrage opportunity - probably data error.
         - Stock at $100. Strike price is $90. Option price now is $9.5. This is a simple arbitrage which shoudn't exist
         - a person who buys the option and exercises it will get the stock $0.5 cheaper than buying on the open market
-      - any volatility more than 2.5 is removed
+      - any volatility more than 3 is removed
         - affects the overall scaling of the surface graph
 - Timing issues
     - black-scholes is calculated using the number of calendar days till expiry i.e. options expiring in hours (not days) will be 0/365

@@ -1,12 +1,13 @@
-import streamlit as st
 import numpy as np
-import plotly.graph_objects as go
+import streamlit as st
+
 from pricer.model.monte_carlo import MonteCarlo
+from pricer.plotter.plot_monte_carlo import plot_traces
 
 st.set_page_config(layout="wide", page_title="Asian Option Pricer", page_icon="🎲")
 st.title("Monte Carlo: Asian Option Pricer")
 
-# --- BRIDGE: Retrieve Shared Data ---
+# Get data from previous page
 available_data = st.session_state.get('page_2_data', {})
 
 # Create list for dropdown
@@ -83,37 +84,6 @@ with col_plot:
         m3.metric("Avg. Final Price", f"${avg_final:.2f}")
 
         # --- Plotting ---
-        fig_mc = go.Figure()
-        days_axis = list(range(paths.shape[1]))
-
-        # Limit paths for performance
-        display_limit = 200
-        subset_paths = paths[:display_limit]
-        
-        for i in range(len(subset_paths)):
-            fig_mc.add_trace(go.Scatter(
-                x=days_axis, y=np.concatenate((np.array([mc_price]), subset_paths[i])),
-                mode='lines',
-                line=dict(width=1, color='rgba(0, 200, 255, 0.1)'),
-                showlegend=False, hoverinfo='skip'
-            ))
-
-        # Average Path
-        avg_path = np.mean(paths, axis=0)
-        fig_mc.add_trace(go.Scatter(
-            x=days_axis, y=avg_path,
-            mode='lines',
-            line=dict(width=3, color='#FF4B4B'),
-            name='Average Path'
-        ))
-        
-        # Strike Line
-        fig_mc.add_hline(y=mc_strike, line_dash="dash", line_color="orange", annotation_text="Strike")
-
-        fig_mc.update_layout(
-            title=f"Monte Carlo Simulation - {selected_ticker} - {mc_iter} Paths (showing 200)",
-            xaxis_title="Days", yaxis_title="Price",
-            template="plotly_dark", height=600
-        )
+        fig_mc = plot_traces(paths, mc_price, mc_strike, mc_iter, selected_ticker)
         
         st.plotly_chart(fig_mc, width='stretch')
