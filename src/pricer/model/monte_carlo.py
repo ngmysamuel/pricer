@@ -15,6 +15,7 @@ class MonteCarlo:
     """
     generator = np.random.default_rng()
     time_delta = 1 / 252
+    prices_archive = []
     payoffs = []
     for _ in range(iterations):
         prices = []
@@ -27,13 +28,15 @@ class MonteCarlo:
             next_price = next_price * np.exp(drift_term + shock_term)
             prices.append(next_price)
         average_price = np.mean(prices)
+        prices_archive.append(prices.copy())
         if typ == "call":
             payoffs.append(max(0, average_price - strike))
         else:
             payoffs.append(max(0, strike - average_price))
     average_payoff = np.mean(payoffs)
     discounted_price = average_payoff  * np.exp(-r * (path_length / 252))
-    return discounted_price
+    return discounted_price, prices_archive
 
 m = MonteCarlo()
-print(m.simple_random_walk(current_price=10,volatility=0.4,strike=10,typ="call",path_length=100))
+px, _ = m.simple_random_walk(current_price=10,volatility=0.4,strike=10,typ="call",path_length=100)
+print(px)

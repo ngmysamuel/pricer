@@ -64,8 +64,11 @@ However, if the option has too small a vega or is near expiration, Newton - Raph
     - but if we do need to include, will need to use seconds instead
 
 ### To Do
+Black - Scholes
 - to use Let's Be Rational paper to calculate BS (https://vollib.org/)
 - use Brent's Method (brentq) rather than just bisection
+Monte - Carlo
+- Use Milstein instead of Brownian
 
 ### Resources
 Black - Scholes
