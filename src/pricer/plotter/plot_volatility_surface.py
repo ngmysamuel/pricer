@@ -21,6 +21,8 @@ def create_volatility_surface(calls_data):
     # 'cubic' looks smoother, 'linear' is more robust to outliers
     Z = griddata((x, y), z, (X, Y), method='cubic')
 
+    np.savetxt('implied_vol.csv', Z, delimiter=',')
+
     return X, Y, Z
 
 def find_vol_arbitrage(Z, threshold=0.05):

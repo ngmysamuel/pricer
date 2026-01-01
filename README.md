@@ -19,9 +19,8 @@ poetry run python -m pricer.model.black_scholes_model
 poetry run python -m pricer.model.monte_carlo
 ```
 
-## Others
+## Notes
 
-### Notes
 Black-scholes can be used to either find the fair value of an option (assuming a uniform volatility surface) or the volatility implied by its current market price. This application calculates the implied volatility given the current market price of the option and plots a 3D surface against the option's strike price and days to expiry.
 
 To shift black-scholes so that the volatility becomes the subject, the first order derivative of it is required.Good news, the first order derivative is the same for both PUT and CALLs. The formula is as such:
@@ -63,19 +62,26 @@ However, if the option has too small a vega or is near expiration, Newton - Raph
     - we filter out options close to expiry so no issue with the above
     - but if we do need to include, will need to use seconds instead
 
-### To Do
-Black - Scholes
+## To Do
+### Black - Scholes
 - to use Let's Be Rational paper to calculate BS (https://vollib.org/)
 - use Brent's Method (brentq) rather than just bisection
-Monte - Carlo
-- Use Milstein instead of Brownian
+### Monte - Carlo
+- Use Milstein instead of Brownian (https://quant.stackexchange.com/q/30362)
+### Others
+- Value European and American Options using trinomial trees (https://essay.utwente.nl/fileshare/file/59223/scriptie__R_van_der_Kamp.pdf)
 
-### Resources
-Black - Scholes
+## Resources
+### Black - Scholes
 - https://theaiquant.medium.com/mastering-the-black-scholes-model-with-python-a-comprehensive-guide-to-option-pricing-11af712697b7
 - http://www.appliedbusinesseconomics.com/files/gvsnr02.pdf
 - https://brilliant.org/wiki/newton-raphson-method/
 - https://brilliant.org/wiki/root-approximation-bisection/
-Monte - Carlo
+### Monte - Carlo
+#### Random Walk (Brownian)
 - https://www.investopedia.com/articles/07/montecarlo.asp (Euler-Maruyama Discretization)
 - https://quant.stackexchange.com/q/17032 (expected return is the risk free rate)
+- https://quant.stackexchange.com/q/4589 (Geometric Brownian)
+#### Local Volatility
+- https://medium.com/@abatrek059/local-volatility-surface-exotic-options-pricing-an-example-1caa3cf1ed89
+- https://financetrainingcourse.com/education/2014/05/implied-and-local-volatility-surfaces-in-excel-final-steps/
