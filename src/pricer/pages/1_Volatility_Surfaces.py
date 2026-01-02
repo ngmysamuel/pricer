@@ -21,7 +21,7 @@ user_input = st.sidebar.text_input(
     value="AAPL", 
     help="Enter ticker (e.g., AAPL). Separate multiples with commas."
 )
-limit_size = st.sidebar.number_input("Contract Limit", min_value=100, max_value=50000, value=1000, step=100)
+limit_size = st.sidebar.number_input("Contract Limit", min_value=100, max_value=50000, value=1000, step=100, help="Max number of options to pull per ticker")
 
 # Process Symbols
 symbols = [s.strip().upper() for s in user_input.split(",") if s.strip()]
@@ -48,6 +48,10 @@ if not contracts_dict:
     st.error(f"No data found for {symbols}.")
     st.stop()
 
+# Adjustable resliution for interpolation based on the number of valid data points
+max_resolution = min([val.shape[0] for val in contracts_dict.values()])
+resolution = st.sidebar.number_input("Surface Resolution", min_value=50, max_value=max_resolution, value=50, step=10, help=f"Higher = smoother but slower. Max = {max_resolution}")
+
 page_2_data = {}
 
 # --- Main Visualization Loop ---
@@ -72,7 +76,7 @@ for key, df in contracts_dict.items():
     # ---------------------------------------------
 
     try:
-        x, y, z = create_volatility_surface(df)
+        x, y, z = create_volatility_surface(df, resolution)
         
         # Local Controls
         col1, col2 = st.columns([1, 2])
