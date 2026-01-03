@@ -69,9 +69,6 @@ where:
 |$\frac{\partial w}{\partial T}$|Taken as the change in w divided by the change in y, $\frac{\Delta w}{\Delta T}$, while keeping $y$ constant. This thus, is problematic because $y$ cannot be kept constant while varying $T$. This can be manipulated into $\frac{\Delta w}{\Delta T}_K + \frac{\Delta w}{\Delta K}_T \cdot (r-q)K$. This derivation is left as an exercise to the reader. (kidding, see below for the derivation). Note the subscript $_x$ represents what is kept constant. |
 |$\frac{\partial^2 w}{\partial y^2}$| Similar to the above but make use of $\frac{\Delta w}{\Delta y}$'s gradient while still keeping $T$ unchanging.|
 
-
-Some additonal remarks on the grids of the variables
-
 |Grids of variables|Notes|
 |-|-|
 |Maturity|1D varies along the horizontal (increases →) |
@@ -83,41 +80,39 @@ Some additonal remarks on the grids of the variables
 
 #### Derivation of $\frac{\partial w}{\partial T}$
 
-We know the total derivative of $\frac{\partial w}{\partial T}$ can be written as (note subscript $_x$ represents the value being kept constant)
+The total derivative of $\frac{\partial w}{\partial T}$ can be written as (note subscript $_x$ represents the value being kept constant)
 
 $$\frac{\partial w}{\partial T}_y = \frac{\partial w}{\partial K} \cdot \frac{\partial K}{\partial T} + \frac{\partial w}{\partial T}_K \cdot \frac{\partial T}{\partial T}$$
 
-$\frac{\partial T}{\partial T} = 1$ so we simplify that away, leaving
+Simplify away $\frac{\partial T}{\partial T} = 1$, giving __Equation 1__
 
-$$\frac{\partial w}{\partial T}_y = \frac{\partial w}{\partial K} \cdot \frac{\partial K}{\partial T} + \frac{\partial w}{\partial T}_K\tag{1}$$
+$$\frac{\partial w}{\partial T}_y = \frac{\partial w}{\partial K} \cdot \frac{\partial K}{\partial T} + \frac{\partial w}{\partial T}_K$$
 
-We know $\frac{\partial w}{\partial T}_K$ and $\frac{\partial w}{\partial K}$; this leaves $\frac{\partial K}{\partial T}$ to be found
-
-We take a look at the formula for $y$ - why y? a clue is that we need $\frac{\partial K}{\partial T}$ while $y$ remains constant
+$\frac{\partial w}{\partial T}_K$ and $\frac{\partial w}{\partial K}$ is known; this leaves $\frac{\partial K}{\partial T}$ to be found. Zoom in on the formula for $y$ - why y? A clue is that $\frac{\partial K}{\partial T}$ is needed while having $y$ remain constant
 
 $$y = ln(\frac{K}{F_T})$$
 
-We sub in $F_T$ and simplify the $ln$ terms
+Substitute in $F_T$ and simplify the $ln$ terms
 
 $$y = ln(K) - ln(S_0e^{(r-q)T})$$
 $$y = ln(K) - (r-q)T - ln(S_0)$$
 
-We rearrange the formula to get K as the subject (we want to differentiate K after all)
+Rearrange the formula to get K as the subject (objective is to differentiate K after all), giving __Equation 2__
 
 $$ln(K) = y + (r-q)T + ln(S_0)$$
 $$K = \exp(y + ln(S_0) + (r-q)T)$$
-$$\begin{equation}K = e^y \cdot S_0 \cdot e^{(r-q)T}\end{equation}$$
+$$K = e^y \cdot S_0 \cdot e^{(r-q)T}$$
 
-We differentiate K with respect to T
+Differentiate K with respect to T
 
 $$\frac{\partial K}{\partial T} = e^y \cdot S_0 \cdot (r-q)e^{(r-q)T}$$
 $$\frac{\partial K}{\partial T} = e^y \cdot S_0 \cdot e^{(r-q)T} \cdot (r-q)$$
 
-Notice that the first 3 terms equal $K$ as seen in Equation (2). We sub in that value
+Notice that the first 3 terms equal $K$ as seen in __Equation 2__. Substitute in that value, giving __Equation 3__
 
-$$\begin{equation}\frac{\partial K}{\partial T} = K \cdot (r-q)\end{equation}$$
+$$\frac{\partial K}{\partial T} = K \cdot (r-q)$$
 
-With equation (3), we can return to equation (1) and substitute that result in
+Substitute __Equation 3__ into __Equation 1__
 
 $$\frac{\partial w}{\partial T}_y = \frac{\partial w}{\partial K} \cdot \frac{\partial K}{\partial T} + \frac{\partial w}{\partial T}_K$$
 $$\frac{\partial w}{\partial T}_y = \frac{\partial w}{\partial K} \cdot (K(r-q)) + \frac{\partial w}{\partial T}_K$$
