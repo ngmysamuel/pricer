@@ -21,7 +21,7 @@ user_input = st.sidebar.text_input(
     value="AAPL", 
     help="Enter ticker (e.g., AAPL). Separate multiples with commas."
 )
-limit_size = st.sidebar.number_input("Contract Limit", min_value=100, max_value=50000, value=1000, step=100)
+limit_size = st.sidebar.number_input("Contract Limit", min_value=100, max_value=50000, value=1000, step=100, help="Max number of options to pull per ticker")
 
 # Process Symbols
 symbols = [s.strip().upper() for s in user_input.split(",") if s.strip()]
@@ -48,6 +48,10 @@ if not contracts_dict:
     st.error(f"No data found for {symbols}.")
     st.stop()
 
+# Adjustable resliution for interpolation based on the number of valid data points
+max_resolution = min([val.shape[0] for val in contracts_dict.values()])
+resolution = st.sidebar.number_input("Surface Resolution", min_value=50, max_value=max_resolution, value=50, step=10, help=f"Higher = smoother but slower. Max = {max_resolution}")
+
 page_2_data = {}
 
 # --- Main Visualization Loop ---
@@ -61,18 +65,23 @@ for key, df in contracts_dict.items():
     # --- Save Data for Monte Carlo Page ---
     # We grab the latest close price and a median IV to help seed the next page
     latest_price = data.asset_price_dict[key] if key in data.asset_price_dict else 100.0
+    dividend_yield = data.dividend_yield_dict[key] if key in data.asset_price_dict else 0
     avg_iv = df['calculated_iv'].median() if 'calculated_iv' in df.columns else 0.2
     
     # Save to Session State so Page 2 can see it
     page_2_data[key] = {
         'symbol': key,
         'price': latest_price,
+        'dividend_yield': dividend_yield,
         'vol': avg_iv
     }
     # ---------------------------------------------
 
     try:
-        x, y, z = create_volatility_surface(df)
+        x, y, z = create_volatility_surface(df, resolution)
+        page_2_data[key]["maturities"] = x
+        page_2_data[key]["strike_prices"] = y
+        page_2_data[key]["implied_vol"] = z
         
         # Local Controls
         col1, col2 = st.columns([1, 2])
@@ -86,7 +95,7 @@ for key, df in contracts_dict.items():
                 anomaly_mask = find_vol_arbitrage(z, threshold=threshold)
                 st.metric("Anomalies Detected", int(np.sum(anomaly_mask)))
 
-        fig = plot_volatility_surface(x, y, z, anomaly_mask)
+        fig = plot_volatility_surface(x, y, z, 'Implied Volatility', anomaly_mask)
         st.plotly_chart(fig, width="stretch")
         
         st.info(f"💡 **Analysis for {key}:** Data saved. Navigate to 'Asian Option Pricer' in the sidebar to price options using this data.")

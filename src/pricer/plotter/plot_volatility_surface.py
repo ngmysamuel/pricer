@@ -4,17 +4,14 @@ import plotly.graph_objects as go
 from scipy.interpolate import griddata
 
 
-def create_volatility_surface(calls_data):
-    # 1. Extract scattered data points directly
-    # not using pivot_table here to avoid dropping sparse data
+def create_volatility_surface(calls_data, resolution: int):
     x = calls_data["days_to_expiry"]
     y = calls_data["strike_price"]
     z = calls_data["calculated_iv"]
 
     # 2. Define a regular grid to interpolate onto
-    # Adjust '50' to change resolution (higher = smoother but slower)
-    xi = np.linspace(x.min(), x.max(), 50)
-    yi = np.linspace(y.min(), y.max(), 50)
+    xi = np.linspace(x.min(), x.max(), resolution)
+    yi = np.linspace(y.min(), y.max(), resolution)
     X, Y = np.meshgrid(xi, yi)
 
     # 3. Interpolate the scattered data onto the grid
@@ -39,14 +36,14 @@ def find_vol_arbitrage(Z, threshold=0.05):
     
     return mask
 
-def plot_volatility_surface(X, Y, Z, anomaly_mask=None):
+def plot_volatility_surface(X, Y, Z, title: str, anomaly_mask=None):
     # Create interactive 3D plot with Plotly
     fig = go.Figure(data=[go.Surface(
         x=X, 
         y=Y, 
         z=Z,
         colorscale='Viridis',
-        colorbar_title='Implied Volatility',
+        colorbar_title=title,
         name="Vol Surface"
     )])
 
@@ -71,7 +68,7 @@ def plot_volatility_surface(X, Y, Z, anomaly_mask=None):
         ))
 
     fig.update_layout(
-        title='Implied Volatility Surface',
+        title=title,
         scene=dict(
             xaxis_title='Days to Expiration',
             yaxis_title='Strike Price',

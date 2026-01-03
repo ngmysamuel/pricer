@@ -19,9 +19,8 @@ poetry run python -m pricer.model.black_scholes_model
 poetry run python -m pricer.model.monte_carlo
 ```
 
-## Others
+## Notes
 
-### Notes
 Black-scholes can be used to either find the fair value of an option (assuming a uniform volatility surface) or the volatility implied by its current market price. This application calculates the implied volatility given the current market price of the option and plots a 3D surface against the option's strike price and days to expiry.
 
 To shift black-scholes so that the volatility becomes the subject, the first order derivative of it is required.Good news, the first order derivative is the same for both PUT and CALLs. The formula is as such:
@@ -39,6 +38,8 @@ $V^{\prime }(\hat{\sigma })$ thus means the first order derivative of black-scho
 We start off with a guess as to where the volatility is that resulted in the current market price. Using the formula above, we can get a sigma value. Using Newton - Raphson, we can solve for the implied volatility. This is done by comparing the resulting sigma and the initial sigma guess. If they do not align, we repeat using the resulting sigma value as the guess value now. 
 
 However, if the option has too small a vega or is near expiration, Newton - Raphson would not work. The fall back will use the bisection approach to solve for a root. Taking two maximum and minimum volatility guesses, we keep shifting solving for the option price using a midpoint sigma till we get a match with the current market value of the option. 
+
+For pricing an Asian Option, we make use of the IV surface derived above by converting it to a local volatility (LV) surface which allows us to walk down the price path with more accuracy.
 
 ### Implementaion Details
 - Filtering of data - happens in 2 places, the model and the data
@@ -63,19 +64,28 @@ However, if the option has too small a vega or is near expiration, Newton - Raph
     - we filter out options close to expiry so no issue with the above
     - but if we do need to include, will need to use seconds instead
 
-### To Do
-Black - Scholes
+## To Do
+### Black - Scholes
 - to use Let's Be Rational paper to calculate BS (https://vollib.org/)
 - use Brent's Method (brentq) rather than just bisection
-Monte - Carlo
-- Use Milstein instead of Brownian
+### Monte - Carlo
+- Use Milstein instead of Brownian (https://quant.stackexchange.com/q/30362)
+- Use control variates
+- Smoothen the IV surface
+### Others
+- Value European and American Options using trinomial trees (https://essay.utwente.nl/fileshare/file/59223/scriptie__R_van_der_Kamp.pdf)
 
-### Resources
-Black - Scholes
+## Resources
+### Black - Scholes
 - https://theaiquant.medium.com/mastering-the-black-scholes-model-with-python-a-comprehensive-guide-to-option-pricing-11af712697b7
 - http://www.appliedbusinesseconomics.com/files/gvsnr02.pdf
 - https://brilliant.org/wiki/newton-raphson-method/
 - https://brilliant.org/wiki/root-approximation-bisection/
-Monte - Carlo
+### Monte - Carlo
+#### Random Walk (Brownian)
 - https://www.investopedia.com/articles/07/montecarlo.asp (Euler-Maruyama Discretization)
 - https://quant.stackexchange.com/q/17032 (expected return is the risk free rate)
+- https://quant.stackexchange.com/q/4589 (Geometric Brownian)
+#### Local Volatility
+- https://medium.com/@abatrek059/local-volatility-surface-exotic-options-pricing-an-example-1caa3cf1ed89
+- https://financetrainingcourse.com/education/2014/05/implied-and-local-volatility-surfaces-in-excel-final-steps/
