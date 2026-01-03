@@ -51,13 +51,13 @@ $$v_L(y, T) = \frac{\frac{\partial w}{\partial T}}{1 - \frac{y}{w} \frac{\partia
 
 where:
 
-| Terms      |  |
+| Terms      | Terms |
 | ----------- | ----------- |
 | $T$ is the period in years| $S_0$ is the underlying asset's price|
 | $K$ is the strike price| $r$ is the risk free rate|
 |$q$ is the dividend rate|$\sigma$ is the implied volatility|
 
-|Complex Terms|
+|Compound Terms|
 |-|
 |$F_T = S_0e^{(r-q)T}$|
 |$y = ln(\frac{K}{F_T})$|
@@ -65,12 +65,12 @@ where:
 
 |Derivative|Notes|
 |-|-|
-|$\frac{\partial w}{\partial y}$|We take this as the change in w divided by the change in y, $\frac{\Delta w}{\Delta y}$, while keeping $T$ constant. This derivative can be calculated as is because we have the means to keep $T$ constant while varying $w$ and $y$ - going down the columns of the matrix ensures maturity is not changing|
-|$\frac{\partial w}{\partial T}$|We take this as the change in w divided by the change in y, $\frac{\Delta w}{\Delta T}$, while keeping $y$ constant. This thus, is problematic because $y$ cannot be kept constant while varying $T$. This can be manipulated into $\frac{\Delta w}{\Delta T}_K + \frac{\Delta w}{\Delta K}_T \cdot (r-q)K$. I leave the derivation as an exercise to the reader. (kidding, see below for the derivation). Note the subscript $_x$ represents what I am keeping constant. |
-|$\frac{\partial^2 w}{\partial y^2}$| Similar to the above just that we make use of $\frac{\Delta w}{\Delta y}$'s gradient while still keeping $T$ unchanging.|
+|$\frac{\partial w}{\partial y}$|Taken as the change in w divided by the change in y, $\frac{\Delta w}{\Delta y}$, while keeping $T$ constant. This derivative can be calculated as is because we have the means to keep $T$ constant while varying $w$ and $y$ - going down the columns of the matrix ensures maturity is not changing|
+|$\frac{\partial w}{\partial T}$|Taken as the change in w divided by the change in y, $\frac{\Delta w}{\Delta T}$, while keeping $y$ constant. This thus, is problematic because $y$ cannot be kept constant while varying $T$. This can be manipulated into $\frac{\Delta w}{\Delta T}_K + \frac{\Delta w}{\Delta K}_T \cdot (r-q)K$. This derivation is left as an exercise to the reader. (kidding, see below for the derivation). Note the subscript $_x$ represents what is kept constant. |
+|$\frac{\partial^2 w}{\partial y^2}$| Similar to the above but make use of $\frac{\Delta w}{\Delta y}$'s gradient while still keeping $T$ unchanging.|
 
 
-Some addiitonal remarks on the grids of the variables
+Some additonal remarks on the grids of the variables
 
 |Grids of variables|Notes|
 |-|-|
@@ -84,15 +84,16 @@ Some addiitonal remarks on the grids of the variables
 #### Derivation of $\frac{\partial w}{\partial T}$
 
 We know the total derivative of $\frac{\partial w}{\partial T}$ can be written as (note subscript $_x$ represents the value being kept constant)
+
 $$\frac{\partial w}{\partial T}_y = \frac{\partial w}{\partial K} \cdot \frac{\partial K}{\partial T} + \frac{\partial w}{\partial T}_K \cdot \frac{\partial T}{\partial T}$$
 
-$\frac{\partial T}{\partial T} = 1$ so we simplify that away.
+$\frac{\partial T}{\partial T} = 1$ so we simplify that away, leaving
 
 $$\begin{equation}
 \frac{\partial w}{\partial T}_y = \frac{\partial w}{\partial K} \cdot \frac{\partial K}{\partial T} + \frac{\partial w}{\partial T}_K
 \end{equation}$$
 
-We know $\frac{\partial w}{\partial T}_K$ and $\frac{\partial w}{\partial K}$; this leaves $\frac{\partial K}{\partial T}$ to be manipulated
+We know $\frac{\partial w}{\partial T}_K$ and $\frac{\partial w}{\partial K}$; this leaves $\frac{\partial K}{\partial T}$ to be found
 
 We take a look at the formula for $y$ - why y? a clue is that we need $\frac{\partial K}{\partial T}$ while $y$ remains constant
 
@@ -105,13 +106,13 @@ $$y = ln(K) - (r-q)T - ln(S_0)$$
 
 We rearrange the formula to get K as the subject (we want to differentiate K after all)
 
-
 $$ln(K) = y + (r-q)T + ln(S_0)$$
 $$K = \exp(y + ln(S_0) + (r-q)T)$$
-$$\begin{equation}
+$$
+\begin{equation}
 K = e^y \cdot S_0 \cdot e^{(r-q)T}
-\end{equation}$$
-
+\end{equation}
+$$
 
 We differentiate K with respect to T
 
@@ -119,17 +120,11 @@ $$\frac{\partial K}{\partial T} = e^y \cdot S_0 \cdot (r-q)e^{(r-q)T}$$
 $$\frac{\partial K}{\partial T} = e^y \cdot S_0 \cdot e^{(r-q)T} \cdot (r-q)$$
 
 Notice that the first 3 terms equal $K$ as seen in Equation (2). We sub in that value
-$$\begin{equation}
-\frac{\partial K}{\partial T} = K \cdot (r-q)
-\end{equation}$$
+$$\begin{equation}\frac{\partial K}{\partial T} = K \cdot (r-q)\end{equation}$$
 
 With equation (3), we can return to equation (1) and substitute that result in
-$$
-\frac{\partial w}{\partial T}_y = \frac{\partial w}{\partial K} \cdot \frac{\partial K}{\partial T} + \frac{\partial w}{\partial T}_K
-$$
-$$
-\frac{\partial w}{\partial T}_y = \frac{\partial w}{\partial K} \cdot (K(r-q)) + \frac{\partial w}{\partial T}_K
-$$
+$$\frac{\partial w}{\partial T}_y = \frac{\partial w}{\partial K} \cdot \frac{\partial K}{\partial T} + \frac{\partial w}{\partial T}_K$$
+$$\frac{\partial w}{\partial T}_y = \frac{\partial w}{\partial K} \cdot (K(r-q)) + \frac{\partial w}{\partial T}_K$$
 
 #### Intuition
 We are looking for change in $w$ and change in $T$ while keeping all other variables including $y$ and $K$ constant.
