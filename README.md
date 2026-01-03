@@ -89,9 +89,7 @@ $$\frac{\partial w}{\partial T}_y = \frac{\partial w}{\partial K} \cdot \frac{\p
 
 $\frac{\partial T}{\partial T} = 1$ so we simplify that away, leaving
 
-$$\begin{equation}
-\frac{\partial w}{\partial T}_y = \frac{\partial w}{\partial K} \cdot \frac{\partial K}{\partial T} + \frac{\partial w}{\partial T}_K
-\end{equation}$$
+$$\frac{\partial w}{\partial T}_y = \frac{\partial w}{\partial K} \cdot \frac{\partial K}{\partial T} + \frac{\partial w}{\partial T}_K\tag{1}$$
 
 We know $\frac{\partial w}{\partial T}_K$ and $\frac{\partial w}{\partial K}$; this leaves $\frac{\partial K}{\partial T}$ to be found
 
