@@ -39,6 +39,8 @@ We start off with a guess as to where the volatility is that resulted in the cur
 
 However, if the option has too small a vega or is near expiration, Newton - Raphson would not work. The fall back will use the bisection approach to solve for a root. Taking two maximum and minimum volatility guesses, we keep shifting solving for the option price using a midpoint sigma till we get a match with the current market value of the option. 
 
+For pricing an Asian Option, we make use of the IV surface derived above by converting it to a local volatility (LV) surface which allows us to walk down the price path with more accuracy.
+
 ### Implementaion Details
 - Filtering of data - happens in 2 places, the model and the data
     - data - filters based on the data that is available
@@ -68,6 +70,8 @@ However, if the option has too small a vega or is near expiration, Newton - Raph
 - use Brent's Method (brentq) rather than just bisection
 ### Monte - Carlo
 - Use Milstein instead of Brownian (https://quant.stackexchange.com/q/30362)
+- Use control variates
+- Smoothen the IV surface
 ### Others
 - Value European and American Options using trinomial trees (https://essay.utwente.nl/fileshare/file/59223/scriptie__R_van_der_Kamp.pdf)
 

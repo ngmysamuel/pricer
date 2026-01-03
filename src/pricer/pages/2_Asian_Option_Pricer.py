@@ -50,14 +50,14 @@ with col_params:
     mc_strike = st.number_input("Strike Price ($)", value=default_strike, step=0.5, help="Defaulted to the 5% OTM")
     
     if selected_ticker != "Manual Entry":
-        mc_vol = st.number_input("Volatility (σ)", value=0, disabled=True)
+        mc_vol = st.number_input("Volatility (σ)", value=None, disabled=True)
         st.info("Utilizing local volatility from implied volatility from previous page")
     else:
         mc_vol = st.number_input("Volatility (σ)", value=default_vol, step=0.01, format="%.4f", help="Defaulted to median of IVs calculated in the previous page")
     
     mc_r = st.number_input("Risk Free Rate (r)", value=0.035, step=0.001, format="%.3f")
     mc_days = st.number_input("Days to Expiration", value=30, step=1)
-    mc_iter = st.number_input("Iterations", value=1000, step=100, max_value=1000000)
+    mc_iter = st.number_input("Iterations", value=10000, step=100, max_value=1000000)
     
     st.markdown("---")
     run_sim = st.button("Run Simulation", type="primary", use_container_width=True)
@@ -68,7 +68,7 @@ with col_plot:
         with st.spinner("Spinning up local volatility surface from implied volatility"):
             mc.local_volatility()
         with st.spinner(f"Simulating {mc_iter} paths for {selected_ticker}..."):
-            calc_price, paths = mc.simple_random_walk(
+            calc_price, paths, std_error = mc.simple_random_walk(
                 current_price=mc_price,
                 volatility=mc_vol,
                 strike=mc_strike,
@@ -79,7 +79,7 @@ with col_plot:
 
         # --- Results ---
         # Layout metrics
-        m1, m2, m3 = st.columns(3)
+        m1, m2, m3, m4 = st.columns(4)
         m1.metric(f"Fair Value ({mc_type.title()})", f"${calc_price:.4f}")
         
         final_prices = paths[:, -1]
@@ -88,6 +88,9 @@ with col_plot:
         
         avg_final = np.mean(final_prices)
         m3.metric("Avg. Final Price", f"${avg_final:.2f}")
+        
+        pricing_err = 1.96*std_error
+        m4.metric(f"95% Confidence Interval", f"±${pricing_err:.4f}")
 
         # --- Plotting ---
         fig_mc = plot_traces(paths, mc_price, mc_strike, mc_iter, selected_ticker)

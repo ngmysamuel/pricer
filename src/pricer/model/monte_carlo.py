@@ -14,10 +14,9 @@ class MonteCarlo:
         self.r = r # risk free rate
         self.q = q # dividend yield
 
-        np.savetxt("maturities.csv", self.maturities)
-        np.savetxt("strike_prices.csv", self.strike_prices)
-        np.savetxt("implied_vol.csv", self.implied_vol)
-
+        # np.savetxt("maturities.csv", self.maturities)
+        # np.savetxt("strike_prices.csv", self.strike_prices)
+        # np.savetxt("implied_vol.csv", self.implied_vol)
         print(self.min_maturity, self.max_maturity, self.min_strike, self.max_strike)
 
         self.lv_surface = None
@@ -53,7 +52,10 @@ class MonteCarlo:
         time_elapsed = 0
         for i in range(path_length):
             # Get current volatility (current time and price)
-            lv = self.get_lv(time_elapsed, prices[:, i])
+            if isinstance(volatility, (float, int)):
+                lv = volatility
+            else:
+                lv = self.get_lv(time_elapsed, prices[:, i])
             # Generate and update vars
             random_var = generator.standard_normal(size=iterations)
             time_elapsed += time_delta
@@ -63,6 +65,7 @@ class MonteCarlo:
             shock_term = lv * random_var * np.sqrt(time_delta)
             # Calculate new price
             prices[:, i+1] =  prices[:, i] * np.exp(drift_term + shock_term)
+
         average_price = np.mean(prices[:, 1:], axis=1)
         prices_archive = prices[:self.MAX_DISPLAY_AMT, :].copy()
         if typ == "call":
@@ -70,9 +73,13 @@ class MonteCarlo:
         else:
             payoffs = np.maximum(0, strike - average_price)
 
-        average_payoff = np.mean(payoffs)
-        discounted_price = average_payoff * np.exp(-self.r * (path_length / 252))
-        return discounted_price, np.array(prices_archive)
+        discounted_payoffs = payoffs * np.exp(-self.r * (path_length / 252))
+
+        std_dev = np.std(discounted_payoffs, ddof=1) # Sample standard deviation
+        standard_error = std_dev / np.sqrt(iterations)
+        payoff = np.mean(discounted_payoffs)
+        # print(payoff, np.array(prices_archive), standard_error)
+        return payoff, np.array(prices_archive), standard_error
 
     def get_lv(self, t: float, k: np.ndarray) -> float:
         clamped_t = np.clip(t, self.min_maturity, self.max_maturity)
@@ -106,15 +113,10 @@ class MonteCarlo:
             strike2 z21         z22         z23
             strik3  z31         z32         z33
         """
-        print(self.maturities.shape)
-        print(self.strike_prices.shape)
-        print(self.implied_vol.shape)
         # 0. Set up inputs
         maturities = self.maturities / 365
         maturities_1d = maturities[0,:]
         strike_prices_1d = self.strike_prices[:,0]
-        print("strike_prices_1d.shape: ", strike_prices_1d.shape)
-        print("maturities_1d.shape: ", maturities_1d.shape)
         # 1. Calculate a forward price for every maturity (Ft)
         forward_price = self.asset_price * np.exp(maturities*(self.r-self.q))
         # 2. Calculate a log-moneyness for every (strike price and forward price) (y)
@@ -186,10 +188,10 @@ class MonteCarlo:
 # m = np.loadtxt("maturities.csv")
 # k = np.loadtxt("strike_prices.csv")
 # iv = np.loadtxt("implied_vol.csv")
-# s = 272
+# s = 271.01
 # q = 0
 # r = 0.035
 # m = MonteCarlo(m,k,iv,s,q,r)
 # m.local_volatility()
-# px, _ = m.simple_random_walk(current_price=271.01,volatility=0.25,strike=284.56,typ="call",path_length=30, iterations=1000)
-# print(px)
+# px, _, std_err = m.simple_random_walk(current_price=271.01,volatility=0.25,strike=284.56,typ="call",path_length=30, iterations=10000)
+# print(px, std_err)
