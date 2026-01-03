@@ -59,16 +59,17 @@ with col_params:
 
 with col_plot:
     if run_sim:
+        mc = MonteCarlo(maturities=data["maturities"],strike_prices=data["strike_prices"],implied_vol=data["implied_vol"],asset_price=data["price"],q=data["dividend_yield"],r=mc_r)
+        with st.spinner("Spinning up local volatility surface from implied volatility"):
+            mc.local_volatility()
         with st.spinner(f"Simulating {mc_iter} paths for {selected_ticker}..."):
-            mc = MonteCarlo()
             calc_price, paths = mc.simple_random_walk(
                 current_price=mc_price,
                 volatility=mc_vol,
                 strike=mc_strike,
                 typ=mc_type,
                 path_length=int(mc_days),
-                iterations=int(mc_iter),
-                r=mc_r
+                iterations=int(mc_iter)
             )
 
         # --- Results ---

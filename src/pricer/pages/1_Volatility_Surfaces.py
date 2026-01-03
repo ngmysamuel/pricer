@@ -65,18 +65,23 @@ for key, df in contracts_dict.items():
     # --- Save Data for Monte Carlo Page ---
     # We grab the latest close price and a median IV to help seed the next page
     latest_price = data.asset_price_dict[key] if key in data.asset_price_dict else 100.0
+    dividend_yield = data.dividend_yield_dict[key] if key in data.asset_price_dict else 0
     avg_iv = df['calculated_iv'].median() if 'calculated_iv' in df.columns else 0.2
     
     # Save to Session State so Page 2 can see it
     page_2_data[key] = {
         'symbol': key,
         'price': latest_price,
+        'dividend_yield': dividend_yield,
         'vol': avg_iv
     }
     # ---------------------------------------------
 
     try:
         x, y, z = create_volatility_surface(df, resolution)
+        page_2_data[key]["maturities"] = x
+        page_2_data[key]["strike_prices"] = y
+        page_2_data[key]["implied_vol"] = z
         
         # Local Controls
         col1, col2 = st.columns([1, 2])
