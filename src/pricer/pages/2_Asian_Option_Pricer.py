@@ -57,7 +57,7 @@ with col_params:
     
     mc_r = st.number_input("Risk Free Rate (r)", value=0.035, step=0.001, format="%.3f")
     mc_days = st.number_input("Days to Expiration", value=30, step=1)
-    mc_iter = st.number_input("Iterations", value=1000, step=100, max_value=10000)
+    mc_iter = st.number_input("Iterations", value=1000, step=100, max_value=1000000)
     
     st.markdown("---")
     run_sim = st.button("Run Simulation", type="primary", use_container_width=True)

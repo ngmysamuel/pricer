@@ -47,26 +47,28 @@ class MonteCarlo:
         time_delta = 1 / 252
         prices_archive = []
 
-
         prices = np.empty((iterations, path_length+1))
         prices[:, 0] = current_price
 
         time_elapsed = 0
         for i in range(path_length):
+            # Get current volatility (current time and price)
+            lv = self.get_lv(time_elapsed, prices[:, i])
+            # Generate and update vars
             random_var = generator.standard_normal(size=iterations)
             time_elapsed += time_delta
-            lv = self.get_lv(time_elapsed, prices[:, i])
+            # Form up Geometric Brownian terms
             itos_correction = (lv**2) / 2
             drift_term = (self.r - itos_correction) * time_delta
             shock_term = lv * random_var * np.sqrt(time_delta)
+            # Calculate new price
             prices[:, i+1] =  prices[:, i] * np.exp(drift_term + shock_term)
-        average_price = np.mean(prices, axis=1)
+        average_price = np.mean(prices[:, 1:], axis=1)
         prices_archive = prices[:self.MAX_DISPLAY_AMT, :].copy()
         if typ == "call":
             payoffs = np.maximum(0, average_price - strike)
         else:
             payoffs = np.maximum(0, strike - average_price)
-
 
         average_payoff = np.mean(payoffs)
         discounted_price = average_payoff * np.exp(-self.r * (path_length / 252))
@@ -181,13 +183,13 @@ class MonteCarlo:
         self.lv_surface = local_volatility_interpolater
         return local_volatility_interpolater
 
-m = np.loadtxt("maturities.csv")
-k = np.loadtxt("strike_prices.csv")
-iv = np.loadtxt("implied_vol.csv")
-s = 272
-q = 0
-r = 0.035
-m = MonteCarlo(m,k,iv,s,q,r)
-m.local_volatility()
-px, _ = m.simple_random_walk(current_price=271.01,volatility=0.25,strike=284.56,typ="call",path_length=30, iterations=1000)
-print(px)
+# m = np.loadtxt("maturities.csv")
+# k = np.loadtxt("strike_prices.csv")
+# iv = np.loadtxt("implied_vol.csv")
+# s = 272
+# q = 0
+# r = 0.035
+# m = MonteCarlo(m,k,iv,s,q,r)
+# m.local_volatility()
+# px, _ = m.simple_random_walk(current_price=271.01,volatility=0.25,strike=284.56,typ="call",path_length=30, iterations=1000)
+# print(px)
