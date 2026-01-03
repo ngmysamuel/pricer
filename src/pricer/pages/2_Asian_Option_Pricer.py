@@ -3,6 +3,7 @@ import streamlit as st
 
 from pricer.model.monte_carlo import MonteCarlo
 from pricer.plotter.plot_monte_carlo import plot_traces
+from pricer.plotter.plot_volatility_surface import plot_volatility_surface
 
 st.set_page_config(layout="wide", page_title="Asian Option Pricer", page_icon="🎲")
 st.title("Monte Carlo: Asian Option Pricer")
@@ -48,7 +49,11 @@ with col_params:
     default_strike = round(mc_price * 1.05, 2) if mc_type == "call" else round(mc_price * 0.95, 2)
     mc_strike = st.number_input("Strike Price ($)", value=default_strike, step=0.5, help="Defaulted to the 5% OTM")
     
-    mc_vol = st.number_input("Volatility (σ)", value=default_vol, step=0.01, format="%.4f", help="Defaulted to median of IVs calculated in the previous page")
+    if selected_ticker != "Manual Entry":
+        mc_vol = st.number_input("Volatility (σ)", value=0, disabled=True)
+        st.info("Utilizing local volatility from implied volatility from previous page")
+    else:
+        mc_vol = st.number_input("Volatility (σ)", value=default_vol, step=0.01, format="%.4f", help="Defaulted to median of IVs calculated in the previous page")
     
     mc_r = st.number_input("Risk Free Rate (r)", value=0.035, step=0.001, format="%.3f")
     mc_days = st.number_input("Days to Expiration", value=30, step=1)
@@ -86,5 +91,8 @@ with col_plot:
 
         # --- Plotting ---
         fig_mc = plot_traces(paths, mc_price, mc_strike, mc_iter, selected_ticker)
-        
         st.plotly_chart(fig_mc, width='stretch')
+
+        
+        lv_surface_plot = plot_volatility_surface(data["maturities"], data["strike_prices"], mc.lv_raw, 'Local Volatility')
+        st.plotly_chart(lv_surface_plot, width="stretch")

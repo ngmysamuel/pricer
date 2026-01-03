@@ -95,7 +95,7 @@ for key, df in contracts_dict.items():
                 anomaly_mask = find_vol_arbitrage(z, threshold=threshold)
                 st.metric("Anomalies Detected", int(np.sum(anomaly_mask)))
 
-        fig = plot_volatility_surface(x, y, z, anomaly_mask)
+        fig = plot_volatility_surface(x, y, z, 'Implied Volatility', anomaly_mask)
         st.plotly_chart(fig, width="stretch")
         
         st.info(f"💡 **Analysis for {key}:** Data saved. Navigate to 'Asian Option Pricer' in the sidebar to price options using this data.")

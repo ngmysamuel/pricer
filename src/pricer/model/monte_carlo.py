@@ -21,6 +21,7 @@ class MonteCarlo:
         print(self.min_maturity, self.max_maturity, self.min_strike, self.max_strike)
 
         self.lv_surface = None
+        self.MAX_DISPLAY_AMT = 200
 
     def simple_random_walk(
         self,
@@ -58,11 +59,10 @@ class MonteCarlo:
                 drift_term = (self.r - itos_correction) * time_delta
                 shock_term = lv * random_var * np.sqrt(time_delta)
                 next_price = next_price * np.exp(drift_term + shock_term)
-                if np.isnan(next_price):
-                    print("123")
                 prices.append(next_price)
             average_price = np.mean(prices)
-            prices_archive.append(prices.copy())
+            if len(prices_archive) < self.MAX_DISPLAY_AMT:
+                prices_archive.append(prices.copy())
             if typ == "call":
                 payoffs.append(max(0, average_price - strike))
             else:
@@ -75,7 +75,7 @@ class MonteCarlo:
         clamped_t = np.clip(t, self.min_maturity, self.max_maturity)
         clamped_k = np.clip(k, self.min_strike, self.max_strike)
         val = self.lv_surface((clamped_k, clamped_t))
-        print("lv: ", val, "t: ", t, "k: ", k, " clamped_t: ", clamped_t, " clamped_k: ", clamped_k)
+        # print("lv: ", val, "t: ", t, "k: ", k, " clamped_t: ", clamped_t, " clamped_k: ", clamped_k)
         return val
 
     def local_volatility(self):
@@ -146,7 +146,6 @@ class MonteCarlo:
         mask_invalid = np.isnan(local_volatility)
         mask_valid = ~mask_invalid
 
-        # If we have any NaNs, we must fix them
         if np.any(mask_invalid):
             print(f"Fixed {np.sum(mask_invalid)} NaN values in Local Vol surface.")
             
@@ -160,7 +159,7 @@ class MonteCarlo:
             valid_values = local_volatility[mask_valid]
             
             # 3. Train a "Filler" interpolator
-            # NearestNDInterpolator is perfect here: it extends valid edges into the void
+            # NearestNDInterpolator: extends valid edges into the void
             filler = NearestNDInterpolator(valid_coords, valid_values)
             
             # 4. Fill the holes
@@ -173,6 +172,7 @@ class MonteCarlo:
             # Update the main matrix
             local_volatility[mask_invalid] = filled_values
         np.savetxt('local_volatility.csv', local_volatility)
+        self.lv_raw = local_volatility
         # 10. Set up an interpolater to be able to query the surface for all possible values
         local_volatility_interpolater = RegularGridInterpolator((strike_prices_1d, maturities_1d), local_volatility, bounds_error=False)
         self.lv_surface = local_volatility_interpolater

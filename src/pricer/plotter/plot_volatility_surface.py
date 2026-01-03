@@ -36,14 +36,14 @@ def find_vol_arbitrage(Z, threshold=0.05):
     
     return mask
 
-def plot_volatility_surface(X, Y, Z, anomaly_mask=None):
+def plot_volatility_surface(X, Y, Z, title: str, anomaly_mask=None):
     # Create interactive 3D plot with Plotly
     fig = go.Figure(data=[go.Surface(
         x=X, 
         y=Y, 
         z=Z,
         colorscale='Viridis',
-        colorbar_title='Implied Volatility',
+        colorbar_title=title,
         name="Vol Surface"
     )])
 
@@ -68,7 +68,7 @@ def plot_volatility_surface(X, Y, Z, anomaly_mask=None):
         ))
 
     fig.update_layout(
-        title='Implied Volatility Surface',
+        title=title,
         scene=dict(
             xaxis_title='Days to Expiration',
             yaxis_title='Strike Price',
