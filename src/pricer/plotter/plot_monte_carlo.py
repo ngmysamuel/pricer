@@ -12,15 +12,12 @@ def plot_traces(
     fig_mc = go.Figure()
     days_axis = list(range(paths.shape[1]))
 
-    # Limit paths for performance
-    display_limit = 200
-    subset_paths = paths[:display_limit]
 
-    for i in range(len(subset_paths)):
+    for i in range(paths.shape[0]):
         fig_mc.add_trace(
             go.Scatter(
                 x=days_axis,
-                y=np.concatenate((np.array([mc_price]), subset_paths[i])),
+                y=paths[i],
                 mode="lines",
                 line=dict(width=1, color="rgba(0, 200, 255, 0.1)"),
                 showlegend=False,

@@ -46,35 +46,38 @@ class MonteCarlo:
         generator = np.random.default_rng()
         time_delta = 1 / 252
         prices_archive = []
-        payoffs = []
-        for _ in range(iterations):
-            prices = []
-            next_price = current_price
-            time_elapsed = 0
-            for _ in range(path_length):
-                random_var = generator.standard_normal()
-                time_elapsed += time_delta
-                lv = self.get_lv(time_elapsed, next_price)
-                itos_correction = (lv**2) / 2
-                drift_term = (self.r - itos_correction) * time_delta
-                shock_term = lv * random_var * np.sqrt(time_delta)
-                next_price = next_price * np.exp(drift_term + shock_term)
-                prices.append(next_price)
-            average_price = np.mean(prices)
-            if len(prices_archive) < self.MAX_DISPLAY_AMT:
-                prices_archive.append(prices.copy())
-            if typ == "call":
-                payoffs.append(max(0, average_price - strike))
-            else:
-                payoffs.append(max(0, strike - average_price))
+
+
+        prices = np.empty((iterations, path_length+1))
+        prices[:, 0] = current_price
+
+        time_elapsed = 0
+        for i in range(path_length):
+            random_var = generator.standard_normal(size=iterations)
+            time_elapsed += time_delta
+            lv = self.get_lv(time_elapsed, prices[:, i])
+            itos_correction = (lv**2) / 2
+            drift_term = (self.r - itos_correction) * time_delta
+            shock_term = lv * random_var * np.sqrt(time_delta)
+            prices[:, i+1] =  prices[:, i] * np.exp(drift_term + shock_term)
+        average_price = np.mean(prices, axis=1)
+        prices_archive = prices[:self.MAX_DISPLAY_AMT, :].copy()
+        if typ == "call":
+            payoffs = np.maximum(0, average_price - strike)
+        else:
+            payoffs = np.maximum(0, strike - average_price)
+
+
         average_payoff = np.mean(payoffs)
         discounted_price = average_payoff * np.exp(-self.r * (path_length / 252))
         return discounted_price, np.array(prices_archive)
 
-    def get_lv(self, t: float, k: float) -> float:
+    def get_lv(self, t: float, k: np.ndarray) -> float:
         clamped_t = np.clip(t, self.min_maturity, self.max_maturity)
         clamped_k = np.clip(k, self.min_strike, self.max_strike)
-        val = self.lv_surface((clamped_k, clamped_t))
+        broadcasted_t = clamped_t * np.ones(clamped_k.shape)
+        points_to_interpolate = np.concatenate((clamped_k[:, np.newaxis], broadcasted_t[:, np.newaxis]), axis=1)
+        val = self.lv_surface(points_to_interpolate)
         # print("lv: ", val, "t: ", t, "k: ", k, " clamped_t: ", clamped_t, " clamped_k: ", clamped_k)
         return val
 
@@ -178,13 +181,13 @@ class MonteCarlo:
         self.lv_surface = local_volatility_interpolater
         return local_volatility_interpolater
 
-# m = np.loadtxt("maturities.csv")
-# k = np.loadtxt("strike_prices.csv")
-# iv = np.loadtxt("implied_vol.csv")
-# s = 272
-# q = 0
-# r = 0.035
-# m = MonteCarlo(m,k,iv,s,q,r)
-# m.local_volatility()
-# px, _ = m.simple_random_walk(current_price=272,volatility=0.4,strike=280,typ="call",path_length=100, iterations=1)
-# print(px)
+m = np.loadtxt("maturities.csv")
+k = np.loadtxt("strike_prices.csv")
+iv = np.loadtxt("implied_vol.csv")
+s = 272
+q = 0
+r = 0.035
+m = MonteCarlo(m,k,iv,s,q,r)
+m.local_volatility()
+px, _ = m.simple_random_walk(current_price=271.01,volatility=0.25,strike=284.56,typ="call",path_length=30, iterations=1000)
+print(px)
