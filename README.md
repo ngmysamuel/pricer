@@ -108,11 +108,7 @@ We rearrange the formula to get K as the subject (we want to differentiate K aft
 
 $$ln(K) = y + (r-q)T + ln(S_0)$$
 $$K = \exp(y + ln(S_0) + (r-q)T)$$
-$$
-\begin{equation}
-K = e^y \cdot S_0 \cdot e^{(r-q)T}
-\end{equation}
-$$
+$$\begin{equation}K = e^y \cdot S_0 \cdot e^{(r-q)T}\end{equation}$$
 
 We differentiate K with respect to T
 
@@ -120,9 +116,11 @@ $$\frac{\partial K}{\partial T} = e^y \cdot S_0 \cdot (r-q)e^{(r-q)T}$$
 $$\frac{\partial K}{\partial T} = e^y \cdot S_0 \cdot e^{(r-q)T} \cdot (r-q)$$
 
 Notice that the first 3 terms equal $K$ as seen in Equation (2). We sub in that value
+
 $$\begin{equation}\frac{\partial K}{\partial T} = K \cdot (r-q)\end{equation}$$
 
 With equation (3), we can return to equation (1) and substitute that result in
+
 $$\frac{\partial w}{\partial T}_y = \frac{\partial w}{\partial K} \cdot \frac{\partial K}{\partial T} + \frac{\partial w}{\partial T}_K$$
 $$\frac{\partial w}{\partial T}_y = \frac{\partial w}{\partial K} \cdot (K(r-q)) + \frac{\partial w}{\partial T}_K$$
 
