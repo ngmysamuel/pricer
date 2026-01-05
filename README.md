@@ -154,15 +154,16 @@ That $K$ tweak is $K(r-q)$
 
 ## To Do
 ### Black - Scholes
-- to use Let's Be Rational paper to calculate BS (https://vollib.org/)
-- use Brent's Method (brentq) rather than just bisection
-- live update of options data, implied volatility surface
+- To use Let's Be Rational paper to calculate BS (https://vollib.org/)
+- Use Brent's Method (brentq) rather than just bisection
+- Live update of options data, implied volatility surface
 ### Monte - Carlo
 - Use Milstein instead of Brownian (https://quant.stackexchange.com/q/30362)
 - Use control variates
 - Smoothen the IV surface - SVI parameterization
 ### Others
 - Value European and American Options using trinomial trees (https://essay.utwente.nl/fileshare/file/59223/scriptie__R_van_der_Kamp.pdf)
+- Rewrite math in C++/Rust
 
 ## Resources
 ### Black - Scholes
