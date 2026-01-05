@@ -25,9 +25,9 @@ Please navigate using the sidebar to access the following tools:
 #### 2. 🎲 Asian Option Pricer
 *   **Purpose**: Price Asian Options (Arithmetic Average) using Monte Carlo simulations.
 *   **Features**:
-    *   visualize random walk paths.
+    *   Visualize random walk paths.
     *   Import market data directly from the Volatility Surface tool.
-    *   Calculate Fair Value and Probability of Profit (ITM).
+    *   Calculate Fair Value.
 
 ---
 *Select a page from the sidebar to begin.*
