@@ -31,8 +31,6 @@ with col_params:
     if selected_ticker != "Manual Entry":
         data = available_data[selected_ticker]
         default_price = float(data['price'])
-        # Ensure vol is valid
-        default_vol = float(data['vol']) if data['vol'] > 0 else 0.2
         st.success(f"Loaded data for **{selected_ticker}**")
     else:
         default_price = 100.0

@@ -27,7 +27,10 @@ limit_size = st.sidebar.number_input("Contract Limit", min_value=100, max_value=
 symbols = [s.strip().upper() for s in user_input.split(",") if s.strip()]
 
 # Initialize Data
-data = Data()
+if "data_instance" not in st.session_state:
+    st.session_state["data_instance"] = Data()
+
+data = st.session_state["data_instance"]
 
 @st.cache_data
 def get_data(underlying_symbols: list[str], limit: int = 1000):
